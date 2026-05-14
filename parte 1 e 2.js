@@ -1,7 +1,6 @@
 // GASTROCONTROL — AF3 / AF4
-// Disciplina: Algoritmos e Linguagem de Programação
 // Partes 1 e 2
-// ══ DADOS BASE ══════════════════════════════════════════
+// ══ DADOS BASE 
 
 const cardapio = [
   { id: 1,  nome: "Bruschetta Caprese",    preco: 28.90, categoria: "entrada",   disponivel: true  },
