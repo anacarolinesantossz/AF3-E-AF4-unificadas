@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GastroControl — Sabor & Arte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --wine:       #8b1a1a;
+      --wine-dark:  #6a1414;
+      --wine-light: #faf5f5;
+      --wine-mid:   #f0e8e8;
+      --wine-border:#e8d5d5;
+      --green:      #27ae60;
+      --red-err:    #c0392b;
+      --text:       #1e1e1e;
+      --muted:      #6b7280;
+      --bg:         #f7f2f2;
+      --surface:    #ffffff;
+      --radius:     10px;
+      --shadow-sm:  0 1px 4px rgba(139,26,26,.08);
+      --shadow-md:  0 4px 16px rgba(139,26,26,.12);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--wine);
+      padding: 28px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 18px,
+        rgba(255,255,255,.03) 18px,
+        rgba(255,255,255,.03) 36px
+      );
+    }
+    header .brand {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    header .brand-icon {
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .02em;
+    }
+    header .tagline {
+      font-size: .8rem;
+      color: rgba(255,255,255,.6);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── LAYOUT ── */
+    main {
+      max-width: 960px;
+      margin: 32px auto 0;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--wine-border);
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--wine-border);
+      background: var(--wine-light);
+    }
+    .card-header .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--wine);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: .9rem;
+      flex-shrink: 0;
+    }
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--wine);
+      letter-spacing: .01em;
+    }
+    .card-body {
+      padding: 20px 24px;
+    }
+
+    /* ── BUSCA ── */
+    .search-wrap {
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #busca {
+      width: 100%;
+      padding: 11px 14px 11px 42px;
+      border: 1.5px solid var(--wine-border);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    #busca:focus {
+      border-color: var(--wine);
+      box-shadow: 0 0 0 3px rgba(139,26,26,.12);
+    }
+    #busca::placeholder { color: #b0a0a0; }
+
+    /* ── TABELA ── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .875rem;
+    }
+    thead tr {
+      background: var(--wine);
+    }
+    thead th {
+      color: #fff;
+      padding: 12px 16px;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--wine-border);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: var(--wine-light); }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: var(--wine-mid); }
+
+    .td-nome { font-weight: 500; color: var(--text); }
+    .td-preco { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--wine-dark); }
+
+    /* category badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: capitalize;
+    }
+    .badge-entrada   { background: #fff3e0; color: #c87000; }
+    .badge-principal { background: #fce8e8; color: var(--wine); }
+    .badge-sobremesa { background: #ede7f6; color: #6a1b9a; }
+    .badge-bebida    { background: #e3f2fd; color: #1565c0; }
+
+    /* availability pill */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .pill::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pill-sim { background: #d4f1e3; color: #1a7a47; }
+    .pill-sim::before { background: #27ae60; }
+    .pill-nao { background: #fde8e8; color: #a52020; }
+    .pill-nao::before { background: var(--red-err); }
+
+    .vazio td {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── FORM ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.3fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .field input,
+    .field select {
+      padding: 10px 12px;
+      border: 1.5px solid var(--wine-border);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--wine);
+      box-shadow: 0 0 0 3px rgba(139,26,26,.12);
+    }
+    .field input::placeholder { color: #c0aaaa; }
+
+    .btn-submit {
+      padding: 10px 22px;
+      background: var(--wine);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      white-space: nowrap;
+      letter-spacing: .02em;
+      box-shadow: 0 2px 8px rgba(139,26,26,.25);
+    }
+    .btn-submit:hover { background: var(--wine-dark); box-shadow: var(--shadow-md); }
+    .btn-submit:active { transform: translateY(1px); }
+
+    /* ── MENSAGEM ── */
+    #mensagem {
+      margin-top: 14px;
+      font-size: .85rem;
+      font-weight: 500;
+      min-height: 20px;
+      padding: 0 2px;
+      transition: opacity .2s;
+    }
+    .erro    { color: var(--red-err); }
+    .sucesso { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      header { padding: 22px 20px; }
+      header h1 { font-size: 1.5rem; }
+      main { padding: 0 14px; }
+      .card-body { padding: 16px; }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .btn-submit { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🍽</span>
+      <h1>GastroControl</h1>
+      <span class="tagline">Sabor &amp; Arte</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- BUSCA -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <h2>Buscar Prato</h2>
+      </div>
+      <div class="card-body">
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="busca" placeholder="Filtrar cardápio em tempo real…">
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDÁPIO -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <h2>Cardápio</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Categoria</th>
+              <th>Disponível</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <h2>Adicionar Prato</h2>
+      </div>
+      <div class="card-body">
+        <form id="form-prato">
+          <div class="form-grid">
+            <div class="field">
+              <label for="nome-prato">Nome do Prato</label>
+              <input type="text" id="nome-prato" placeholder="Ex: Risoto de Camarão">
+            </div>
+            <div class="field">
+              <label for="preco-prato">Preço (R$)</label>
+              <input type="number" id="preco-prato" placeholder="0,00" step="0.01" min="0.01">
+            </div>
+            <div class="field">
+              <label for="categoria-prato">Categoria</label>
+              <select id="categoria-prato">
+                <option value="">Selecione…</option>
+                <option value="entrada">Entrada</option>
+                <option value="principal">Principal</option>
+                <option value="sobremesa">Sobremesa</option>
+                <option value="bebida">Bebida</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-submit">Adicionar</button>
+          </div>
+        </form>
+        <p id="mensagem"></p>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const cardapio = [
+      { id: 1,  nome: "Bruschetta Caprese",    preco: 28.90, categoria: "entrada",   disponivel: true  },
+      { id: 2,  nome: "Carpaccio de Salmão",   preco: 42.00, categoria: "entrada",   disponivel: true  },
+      { id: 3,  nome: "Risoto de Cogumelos",   preco: 56.90, categoria: "principal", disponivel: true  },
+      { id: 4,  nome: "Filé ao Molho Madeira", preco: 68.50, categoria: "principal", disponivel: false },
+      { id: 5,  nome: "Salmão Grelhado",       preco: 72.00, categoria: "principal", disponivel: true  },
+      { id: 6,  nome: "Tiramisu",              preco: 24.00, categoria: "sobremesa", disponivel: true  },
+      { id: 7,  nome: "Petit Gâteau",          preco: 32.00, categoria: "sobremesa", disponivel: true  },
+      { id: 8,  nome: "Suco Natural",          preco: 12.00, categoria: "bebida",    disponivel: true  },
+      { id: 9,  nome: "Água com Gás",          preco:  8.00, categoria: "bebida",    disponivel: true  },
+      { id: 10, nome: "Espresso",              preco:  9.50, categoria: "bebida",    disponivel: true  },
+    ];
+
+    function buscarPrato(termo) {
+      return cardapio.filter(p => p.nome.toLowerCase().includes(termo.toLowerCase()));
+    }
+
+    function adicionarPrato(nome, preco, categoria) {
+      const categoriasValidas = ["entrada", "principal", "sobremesa", "bebida"];
+      if (typeof nome !== "string" || nome.trim() === "") throw new Error("Nome não pode ser vazio");
+      if (typeof preco !== "number" || isNaN(preco) || preco <= 0) throw new Error("Preço deve ser um número positivo");
+      if (!categoriasValidas.includes(categoria)) throw new Error("Categoria inválida. Use: entrada, principal, sobremesa, bebida");
+      if (cardapio.some(p => p.nome.toLowerCase() === nome.trim().toLowerCase())) throw new Error("Prato já existe no cardápio");
+      const novo = { id: cardapio.length + 1, nome: nome.trim(), preco, categoria, disponivel: true };
+      cardapio.push(novo);
+      return novo;
+    }
+
+    const badgeClass = { entrada: "badge-entrada", principal: "badge-principal", sobremesa: "badge-sobremesa", bebida: "badge-bebida" };
+
+    function renderizarTabela(lista) {
+      const corpo = document.getElementById("corpo-tabela");
+      corpo.innerHTML = "";
+
+      if (lista.length === 0) {
+        const tr = document.createElement("tr");
+        tr.className = "vazio";
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.textContent = "Nenhum prato encontrado.";
+        tr.appendChild(td);
+        corpo.appendChild(tr);
+        return;
+      }
+
+      lista.forEach(prato => {
+        const tr = document.createElement("tr");
+
+        const tdNome = document.createElement("td");
+        tdNome.className = "td-nome";
+        tdNome.textContent = prato.nome;
+
+        const tdPreco = document.createElement("td");
+        tdPreco.className = "td-preco";
+        tdPreco.textContent = `R$ ${prato.preco.toFixed(2).replace(".", ",")}`;
+
+        const tdCat = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.className = `badge ${badgeClass[prato.categoria] || ""}`;
+        badge.textContent = prato.categoria.charAt(0).toUpperCase() + prato.categoria.slice(1);
+        tdCat.appendChild(badge);
+
+        const tdDisp = document.createElement("td");
+        const pill = document.createElement("span");
+        pill.className = prato.disponivel ? "pill pill-sim" : "pill pill-nao";
+        pill.textContent = prato.disponivel ? "Disponível" : "Indisponível";
+        tdDisp.appendChild(pill);
+
+        tr.append(tdNome, tdPreco, tdCat, tdDisp);
+        corpo.appendChild(tr);
+      });
+    }
+
+    renderizarTabela(cardapio);
+
+    document.getElementById("busca").addEventListener("input", function () {
+      const termo = this.value.trim();
+      renderizarTabela(termo === "" ? cardapio : buscarPrato(termo));
+    });
+
+    document.getElementById("form-prato").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const msgEl     = document.getElementById("mensagem");
+      const nome      = document.getElementById("nome-prato").value;
+      const preco     = parseFloat(document.getElementById("preco-prato").value);
+      const categoria = document.getElementById("categoria-prato").value;
+
+      try {
+        const novo = adicionarPrato(nome, preco, categoria);
+        msgEl.textContent = `✓ Prato "${novo.nome}" adicionado com sucesso!`;
+        msgEl.className   = "sucesso";
+        this.reset();
+        const termoBusca = document.getElementById("busca").value.trim();
+        renderizarTabela(termoBusca === "" ? cardapio : buscarPrato(termoBusca));
+      } catch (e) {
+        msgEl.textContent = `✕ ${e.message}`;
+        msgEl.className   = "erro";
+      }
+    });
+  </script>
+</body>
+</html>
