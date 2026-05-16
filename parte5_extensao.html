@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GastroControl — Extensão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --wine:       #8b1a1a;
+      --wine-dark:  #6a1414;
+      --wine-light: #faf5f5;
+      --wine-mid:   #f0e8e8;
+      --wine-border:#e8d5d5;
+      --green:      #27ae60;
+      --red-err:    #c0392b;
+      --text:       #1e1e1e;
+      --muted:      #6b7280;
+      --bg:         #f7f2f2;
+      --surface:    #ffffff;
+      --radius:     10px;
+      --shadow-sm:  0 1px 4px rgba(139,26,26,.08);
+      --shadow-md:  0 4px 16px rgba(139,26,26,.12);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--wine);
+      padding: 28px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 18px,
+        rgba(255,255,255,.03) 18px, rgba(255,255,255,.03) 36px
+      );
+    }
+    header .brand {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    header .brand-icon { font-size: 2rem; line-height: 1; margin-bottom: 4px; }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .02em;
+    }
+    header .tagline {
+      font-size: .8rem;
+      color: rgba(255,255,255,.6);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    header .ext-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 16px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 99px;
+      font-size: .75rem;
+      color: rgba(255,255,255,.9);
+      letter-spacing: .06em;
+    }
+
+    /* ── LAYOUT ── */
+    main {
+      max-width: 960px;
+      margin: 32px auto 0;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--wine-border);
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--wine-border);
+      background: var(--wine-light);
+    }
+    .card-header .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--wine);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: .9rem;
+      flex-shrink: 0;
+    }
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--wine);
+      letter-spacing: .01em;
+      flex: 1;
+    }
+    .card-body { padding: 20px 24px; }
+
+    /* ── BUBBLE SORT ── */
+    .sort-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .sort-col h3 {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--wine-border);
+    }
+    .sort-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .sort-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--wine-border);
+      font-size: .82rem;
+      background: var(--wine-light);
+    }
+    .sort-item .item-nome { color: var(--text); font-weight: 500; }
+    .sort-item .item-preco {
+      font-weight: 600;
+      color: var(--wine-dark);
+      font-variant-numeric: tabular-nums;
+      font-size: .8rem;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+    .sort-col.depois .sort-item { border-color: #a5d6a7; background: #f1f8f1; }
+    .sort-col.depois .sort-item .item-preco { color: #2e7d32; }
+
+    .algo-box {
+      background: #1e1e2e;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: .78rem;
+      line-height: 1.8;
+      color: #cdd6f4;
+      overflow-x: auto;
+    }
+    .algo-box pre { font-family: 'Courier New', monospace; white-space: pre; }
+    .algo-box .c { color: #6c7086; }
+    .algo-box .k { color: #cba6f7; }
+    .algo-box .f { color: #89b4fa; }
+    .algo-box .s { color: #a6e3a1; }
+    .algo-box .n { color: #fab387; }
+
+    /* ── BUSCA ── */
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%); color: var(--muted); pointer-events: none;
+    }
+    #busca {
+      width: 100%;
+      padding: 11px 14px 11px 42px;
+      border: 1.5px solid var(--wine-border);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    #busca:focus { border-color: var(--wine); box-shadow: 0 0 0 3px rgba(139,26,26,.12); }
+    #busca::placeholder { color: #b0a0a0; }
+
+    /* ── TABELA ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    thead tr { background: var(--wine); }
+    thead th {
+      color: #fff; padding: 12px 16px; text-align: left;
+      font-family: 'Inter', sans-serif; font-size: .75rem;
+      font-weight: 600; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+    }
+    tbody td { padding: 13px 16px; border-bottom: 1px solid var(--wine-border); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: var(--wine-light); }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: var(--wine-mid); }
+    .td-nome { font-weight: 500; color: var(--text); }
+    .td-preco { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--wine-dark); }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 99px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-transform: capitalize;
+    }
+    .badge-entrada   { background: #fff3e0; color: #c87000; }
+    .badge-principal { background: #fce8e8; color: var(--wine); }
+    .badge-sobremesa { background: #ede7f6; color: #6a1b9a; }
+    .badge-bebida    { background: #e3f2fd; color: #1565c0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px; font-size: .75rem; font-weight: 600;
+    }
+    .pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pill-sim { background: #d4f1e3; color: #1a7a47; }
+    .pill-sim::before { background: #27ae60; }
+    .pill-nao { background: #fde8e8; color: #a52020; }
+    .pill-nao::before { background: var(--red-err); }
+    .vazio td { text-align: center; padding: 32px; color: var(--muted); font-style: italic; }
+
+    /* ── FORM ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.3fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: .75rem; font-weight: 600; color: var(--muted);
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .field input, .field select {
+      padding: 10px 12px;
+      border: 1.5px solid var(--wine-border);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      appearance: none; -webkit-appearance: none;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--wine);
+      box-shadow: 0 0 0 3px rgba(139,26,26,.12);
+    }
+    .field input::placeholder { color: #c0aaaa; }
+    .btn-submit {
+      padding: 10px 22px;
+      background: var(--wine);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      white-space: nowrap;
+      letter-spacing: .02em;
+      box-shadow: 0 2px 8px rgba(139,26,26,.25);
+    }
+    .btn-submit:hover { background: var(--wine-dark); box-shadow: var(--shadow-md); }
+    .btn-submit:active { transform: translateY(1px); }
+
+    /* ── LOCALSTORAGE BANNER ── */
+    .ls-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .ls-banner.carregado { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
+    .ls-banner.padrao    { background: #fff8e1; border: 1px solid #ffe082; color: #f57f17; }
+    .ls-banner button {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+      font-family: 'Inter', sans-serif;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      opacity: .85;
+      transition: opacity .2s;
+      flex-shrink: 0;
+    }
+    .ls-banner button:hover { opacity: 1; }
+
+    /* ── MENSAGEM ── */
+    #mensagem {
+      margin-top: 14px;
+      font-size: .85rem;
+      font-weight: 500;
+      min-height: 20px;
+      padding: 0 2px;
+      transition: opacity .2s;
+    }
+    .erro    { color: var(--red-err); }
+    .sucesso { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      header { padding: 22px 20px; }
+      header h1 { font-size: 1.5rem; }
+      main { padding: 0 14px; }
+      .card-body { padding: 16px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .btn-submit { width: 100%; justify-content: center; }
+      .sort-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🍽</span>
+      <h1>GastroControl</h1>
+      <span class="tagline">Sabor &amp; Arte</span>
+      <span class="ext-badge">Extensão — Bubble Sort &amp; localStorage</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ══ EXTENSÃO A — BUBBLE SORT ══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon" style="font-size:1.1rem; font-weight:700;">⇅</div>
+        <h2>Extensão A — Bubble Sort: Cardápio Ordenado por Preço</h2>
+      </div>
+      <div class="card-body">
+
+        <div class="sort-grid">
+          <div class="sort-col antes">
+            <h3>Antes — Ordem Original (por ID)</h3>
+            <ul class="sort-list" id="lista-antes"></ul>
+          </div>
+          <div class="sort-col depois">
+            <h3>Depois — Bubble Sort (preço crescente)</h3>
+            <ul class="sort-list" id="lista-depois"></ul>
+          </div>
+        </div>
+
+        <!-- Código do algoritmo exibido na página -->
+        <div class="algo-box"><pre>
+<span class="c">// Bubble Sort — implementado do zero, sem usar .sort()</span>
+<span class="c">//</span>
+<span class="c">// Como funciona:</span>
+<span class="c">//  1. O array é percorrido várias vezes ("passagens").</span>
+<span class="c">//  2. Em cada passagem, pares de elementos ADJACENTES são comparados.</span>
+<span class="c">//  3. Se o da esquerda for MAIOR que o da direita → os dois são TROCADOS.</span>
+<span class="c">//  4. Ao final de cada passagem, o maior elemento "borbulha" para o fim.</span>
+<span class="c">//  5. Repete até que uma passagem inteira não produza nenhuma troca.</span>
+<span class="c">//  Complexidade: O(n²) — adequado para arrays pequenos.</span>
+
+<span class="k">function</span> <span class="f">bubbleSort</span>(arr) {
+  <span class="k">const</span> n = arr.length;
+
+  <span class="k">for</span> (<span class="k">let</span> passagem = <span class="n">0</span>; passagem &lt; n - <span class="n">1</span>; passagem++) {
+    <span class="k">let</span> houveTroca = <span class="s">false</span>;
+
+    <span class="k">for</span> (<span class="k">let</span> j = <span class="n">0</span>; j &lt; n - <span class="n">1</span> - passagem; j++) {
+      <span class="k">if</span> (arr[j].preco &gt; arr[j + <span class="n">1</span>].preco) {
+        <span class="c">// troca os dois elementos adjacentes</span>
+        <span class="k">const</span> temp = arr[j];
+        arr[j]     = arr[j + <span class="n">1</span>];
+        arr[j + <span class="n">1</span>] = temp;
+        houveTroca = <span class="s">true</span>;
+      }
+    }
+
+    <span class="k">if</span> (!houveTroca) <span class="k">break</span>; <span class="c">// nenhuma troca → array já ordenado</span>
+  }
+
+  <span class="k">return</span> arr;
+}</pre></div>
+
+      </div>
+    </div>
+
+    <!-- ══ EXTENSÃO B — BUSCA (com localStorage) ══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <h2>Buscar Prato</h2>
+      </div>
+      <div class="card-body">
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="busca" placeholder="Filtrar cardápio em tempo real…">
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CARDÁPIO ══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <h2>Cardápio</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Categoria</th>
+              <th>Disponível</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ FORMULÁRIO ══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="section-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <h2>Adicionar Prato</h2>
+      </div>
+      <div class="card-body">
+
+        <!-- banner de status do localStorage -->
+        <div id="ls-banner" class="ls-banner padrao">
+          <span id="ls-texto">⏳ Verificando localStorage…</span>
+          <button id="btn-reset">Limpar dados salvos</button>
+        </div>
+
+        <form id="form-prato">
+          <div class="form-grid">
+            <div class="field">
+              <label for="nome-prato">Nome do Prato</label>
+              <input type="text" id="nome-prato" placeholder="Ex: Risoto de Camarão">
+            </div>
+            <div class="field">
+              <label for="preco-prato">Preço (R$)</label>
+              <input type="number" id="preco-prato" placeholder="0,00" step="0.01" min="0.01">
+            </div>
+            <div class="field">
+              <label for="categoria-prato">Categoria</label>
+              <select id="categoria-prato">
+                <option value="">Selecione…</option>
+                <option value="entrada">Entrada</option>
+                <option value="principal">Principal</option>
+                <option value="sobremesa">Sobremesa</option>
+                <option value="bebida">Bebida</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-submit">Adicionar</button>
+          </div>
+        </form>
+        <p id="mensagem"></p>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ════════════════════════════════════════════════════════
+    // DADOS BASE
+    // ════════════════════════════════════════════════════════
+
+    const dadosBase = [
+      { id: 1,  nome: "Bruschetta Caprese",    preco: 28.90, categoria: "entrada",   disponivel: true  },
+      { id: 2,  nome: "Carpaccio de Salmão",   preco: 42.00, categoria: "entrada",   disponivel: true  },
+      { id: 3,  nome: "Risoto de Cogumelos",   preco: 56.90, categoria: "principal", disponivel: true  },
+      { id: 4,  nome: "Filé ao Molho Madeira", preco: 68.50, categoria: "principal", disponivel: false },
+      { id: 5,  nome: "Salmão Grelhado",       preco: 72.00, categoria: "principal", disponivel: true  },
+      { id: 6,  nome: "Tiramisu",              preco: 24.00, categoria: "sobremesa", disponivel: true  },
+      { id: 7,  nome: "Petit Gâteau",          preco: 32.00, categoria: "sobremesa", disponivel: true  },
+      { id: 8,  nome: "Suco Natural",          preco: 12.00, categoria: "bebida",    disponivel: true  },
+      { id: 9,  nome: "Água com Gás",          preco:  8.00, categoria: "bebida",    disponivel: true  },
+      { id: 10, nome: "Espresso",              preco:  9.50, categoria: "bebida",    disponivel: true  },
+    ];
+
+    // ════════════════════════════════════════════════════════
+    // EXTENSÃO A — BUBBLE SORT (sem .sort())
+    // ════════════════════════════════════════════════════════
+
+    function bubbleSort(arr) {
+      const n = arr.length;
+      for (let passagem = 0; passagem < n - 1; passagem++) {
+        let houveTroca = false;
+        for (let j = 0; j < n - 1 - passagem; j++) {
+          if (arr[j].preco > arr[j + 1].preco) {
+            const temp = arr[j];
+            arr[j]     = arr[j + 1];
+            arr[j + 1] = temp;
+            houveTroca = true;
+          }
+        }
+        if (!houveTroca) break;
+      }
+      return arr;
+    }
+
+    // renderiza as duas colunas (antes e depois) na página
+    function renderSortDemo() {
+      const antes  = dadosBase.map(p => ({ ...p }));           // cópia — ordem original
+      const depois = bubbleSort(dadosBase.map(p => ({ ...p }))); // cópia ordenada
+
+      const listaAntes  = document.getElementById("lista-antes");
+      const listaDepois = document.getElementById("lista-depois");
+
+      function criarItem(prato) {
+        const li = document.createElement("li");
+        li.className = "sort-item";
+        const nome  = document.createElement("span");
+        nome.className   = "item-nome";
+        nome.textContent = prato.nome;
+        const preco = document.createElement("span");
+        preco.className   = "item-preco";
+        preco.textContent = `R$ ${prato.preco.toFixed(2).replace(".", ",")}`;
+        li.append(nome, preco);
+        return li;
+      }
+
+      antes.forEach(p  => listaAntes.appendChild(criarItem(p)));
+      depois.forEach(p => listaDepois.appendChild(criarItem(p)));
+
+      // log no console (exigido pelo enunciado)
+      console.log("── Bubble Sort: Antes ──");
+      console.log(antes.map(p  => `${p.nome}: R$ ${p.preco.toFixed(2)}`));
+      console.log("── Bubble Sort: Depois ──");
+      console.log(depois.map(p => `${p.nome}: R$ ${p.preco.toFixed(2)}`));
+    }
+
+    renderSortDemo();
+
+    // ════════════════════════════════════════════════════════
+    // EXTENSÃO B — localStorage
+    // ════════════════════════════════════════════════════════
+
+    const CHAVE_LS = "gastrocontrol_cardapio";
+
+    function carregarCardapio() {
+      const salvo = localStorage.getItem(CHAVE_LS);
+      // JSON.parse converte a string salva de volta para array de objetos
+      return salvo ? JSON.parse(salvo) : dadosBase.map(p => ({ ...p }));
+    }
+
+    function salvarCardapio() {
+      // JSON.stringify converte o array para string antes de salvar
+      localStorage.setItem(CHAVE_LS, JSON.stringify(cardapio));
+    }
+
+    const cardapio = carregarCardapio();
+
+    // configura o banner de status
+    const banner  = document.getElementById("ls-banner");
+    const lsTexto = document.getElementById("ls-texto");
+
+    function atualizarBanner() {
+      if (localStorage.getItem(CHAVE_LS) !== null) {
+        banner.className  = "ls-banner carregado";
+        lsTexto.textContent = `✓ Cardápio carregado do localStorage — ${cardapio.length} pratos persistidos`;
+      } else {
+        banner.className  = "ls-banner padrao";
+        lsTexto.textContent = "⚠ Usando dados padrão — pratos adicionados serão salvos automaticamente";
+      }
+    }
+
+    atualizarBanner();
+
+    document.getElementById("btn-reset").addEventListener("click", function () {
+      if (confirm("Apagar todos os pratos salvos e voltar ao cardápio original?")) {
+        localStorage.removeItem(CHAVE_LS);
+        location.reload();
+      }
+    });
+
+    // ════════════════════════════════════════════════════════
+    // FUNÇÕES DO PAINEL (reutilizadas da Tarefa 4.3)
+    // ════════════════════════════════════════════════════════
+
+    function buscarPrato(termo) {
+      return cardapio.filter(p => p.nome.toLowerCase().includes(termo.toLowerCase()));
+    }
+
+    function adicionarPrato(nome, preco, categoria) {
+      const categoriasValidas = ["entrada", "principal", "sobremesa", "bebida"];
+      if (typeof nome !== "string" || nome.trim() === "")
+        throw new Error("Nome não pode ser vazio");
+      if (typeof preco !== "number" || isNaN(preco) || preco <= 0)
+        throw new Error("Preço deve ser um número positivo");
+      if (!categoriasValidas.includes(categoria))
+        throw new Error("Categoria inválida. Use: entrada, principal, sobremesa, bebida");
+      if (cardapio.some(p => p.nome.toLowerCase() === nome.trim().toLowerCase()))
+        throw new Error("Prato já existe no cardápio");
+
+      const novo = { id: cardapio.length + 1, nome: nome.trim(), preco, categoria, disponivel: true };
+      cardapio.push(novo);
+      salvarCardapio(); // EXTENSÃO B: persiste no localStorage após cada adição
+      return novo;
+    }
+
+    const badgeClass = {
+      entrada: "badge-entrada", principal: "badge-principal",
+      sobremesa: "badge-sobremesa", bebida: "badge-bebida",
+    };
+
+    function renderizarTabela(lista) {
+      const corpo = document.getElementById("corpo-tabela");
+      corpo.innerHTML = "";
+
+      if (lista.length === 0) {
+        const tr = document.createElement("tr");
+        tr.className = "vazio";
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.textContent = "Nenhum prato encontrado.";
+        tr.appendChild(td);
+        corpo.appendChild(tr);
+        return;
+      }
+
+      lista.forEach(prato => {
+        const tr = document.createElement("tr");
+
+        const tdNome = document.createElement("td");
+        tdNome.className   = "td-nome";
+        tdNome.textContent = prato.nome;
+
+        const tdPreco = document.createElement("td");
+        tdPreco.className   = "td-preco";
+        tdPreco.textContent = `R$ ${prato.preco.toFixed(2).replace(".", ",")}`;
+
+        const tdCat  = document.createElement("td");
+        const badge  = document.createElement("span");
+        badge.className   = `badge ${badgeClass[prato.categoria] || ""}`;
+        badge.textContent = prato.categoria.charAt(0).toUpperCase() + prato.categoria.slice(1);
+        tdCat.appendChild(badge);
+
+        const tdDisp = document.createElement("td");
+        const pill   = document.createElement("span");
+        pill.className   = prato.disponivel ? "pill pill-sim" : "pill pill-nao";
+        pill.textContent = prato.disponivel ? "Disponível" : "Indisponível";
+        tdDisp.appendChild(pill);
+
+        tr.append(tdNome, tdPreco, tdCat, tdDisp);
+        corpo.appendChild(tr);
+      });
+    }
+
+    renderizarTabela(cardapio);
+
+    document.getElementById("busca").addEventListener("input", function () {
+      const termo = this.value.trim();
+      renderizarTabela(termo === "" ? cardapio : buscarPrato(termo));
+    });
+
+    document.getElementById("form-prato").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const msgEl     = document.getElementById("mensagem");
+      const nome      = document.getElementById("nome-prato").value;
+      const preco     = parseFloat(document.getElementById("preco-prato").value);
+      const categoria = document.getElementById("categoria-prato").value;
+
+      try {
+        const novo = adicionarPrato(nome, preco, categoria);
+        msgEl.textContent = `✓ "${novo.nome}" adicionado e salvo no localStorage!`;
+        msgEl.className   = "sucesso";
+        this.reset();
+        atualizarBanner();
+
+        const termoBusca = document.getElementById("busca").value.trim();
+        renderizarTabela(termoBusca === "" ? cardapio : buscarPrato(termoBusca));
+      } catch (e) {
+        msgEl.textContent = `✕ ${e.message}`;
+        msgEl.className   = "erro";
+      }
+    });
+  </script>
+</body>
+</html>
