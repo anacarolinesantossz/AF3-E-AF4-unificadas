@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GastroControl — AF3/AF4 Completo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --wine:       #8b1a1a;
+      --wine-dark:  #6a1414;
+      --wine-light: #faf5f5;
+      --wine-mid:   #f0e8e8;
+      --wine-border:#e8d5d5;
+      --green:      #27ae60;
+      --red-err:    #c0392b;
+      --text:       #1e1e1e;
+      --muted:      #6b7280;
+      --bg:         #f7f2f2;
+      --surface:    #ffffff;
+      --radius:     10px;
+      --shadow-sm:  0 1px 4px rgba(139,26,26,.08);
+      --shadow-md:  0 4px 16px rgba(139,26,26,.12);
+    }
+
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:0 0 60px; }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--wine);
+      padding: 28px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content:''; position:absolute; inset:0;
+      background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,.03) 18px,rgba(255,255,255,.03) 36px);
+    }
+    header .brand { position:relative; display:inline-flex; flex-direction:column; align-items:center; gap:4px; }
+    header .brand-icon { font-size:2rem; line-height:1; margin-bottom:4px; }
+    header h1 { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:#fff; letter-spacing:.02em; }
+    header .tagline { font-size:.8rem; color:rgba(255,255,255,.6); letter-spacing:.18em; text-transform:uppercase; margin-top:2px; }
+    header .subtitle { font-size:.78rem; color:rgba(255,255,255,.7); margin-top:8px; letter-spacing:.04em; }
+
+    /* ── NAV ── */
+    nav.parts-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--wine-dark);
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      padding: 0 24px;
+      overflow-x: auto;
+    }
+    nav.parts-nav a {
+      display: inline-block;
+      padding: 12px 18px;
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-bottom: 3px solid transparent;
+      transition: color .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    nav.parts-nav a:hover { color: #fff; border-bottom-color: rgba(255,255,255,.5); }
+
+    /* ── LAYOUT ── */
+    main { max-width:980px; margin:32px auto 0; padding:0 24px; display:flex; flex-direction:column; gap:32px; }
+
+    /* ── SECTION TITLES ── */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--wine);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--wine-border);
+      margin-bottom: 4px;
+    }
+    .section-group { display:flex; flex-direction:column; gap:16px; }
+
+    /* ── CARDS ── */
+    .card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow-sm); border:1px solid var(--wine-border); overflow:hidden; }
+    .card-header { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--wine-border); background:var(--wine-light); }
+    .card-header .icon {
+      width:30px; height:30px; border-radius:7px; background:var(--wine);
+      display:grid; place-items:center; color:#fff; font-size:.85rem; flex-shrink:0;
+    }
+    .card-header h3 { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:600; color:var(--wine); flex:1; }
+    .card-header .pts { font-size:.72rem; font-weight:600; color:var(--muted); background:var(--wine-mid); padding:3px 8px; border-radius:99px; white-space:nowrap; }
+    .card-body { padding:18px 20px; }
+
+    /* ── OUTPUT BLOCKS ── */
+    .output {
+      background: #1e1e2e;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: .78rem;
+      line-height: 1.7;
+      color: #cdd6f4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-x: auto;
+    }
+    .output-label {
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .output + .output-label { margin-top: 14px; }
+
+    /* ── SORT GRID ── */
+    .sort-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .sort-col h4 { font-size:.7rem; font-weight:600; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--wine-border); }
+    .sort-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
+    .sort-item { display:flex; justify-content:space-between; padding:6px 10px; border-radius:5px; border:1px solid var(--wine-border); background:var(--wine-light); font-size:.8rem; }
+    .sort-item .sn { font-weight:500; }
+    .sort-item .sp { font-weight:600; color:var(--wine-dark); font-variant-numeric:tabular-nums; }
+    .sort-col.depois .sort-item { border-color:#a5d6a7; background:#f1f8f1; }
+    .sort-col.depois .sort-item .sp { color:#2e7d32; }
+
+    /* ── BUSCA ── */
+    .search-wrap { position:relative; }
+    .search-wrap svg { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+    #busca { width:100%; padding:11px 14px 11px 42px; border:1.5px solid var(--wine-border); border-radius:var(--radius); font-family:'Inter',sans-serif; font-size:.9rem; color:var(--text); background:var(--surface); transition:border-color .2s,box-shadow .2s; outline:none; }
+    #busca:focus { border-color:var(--wine); box-shadow:0 0 0 3px rgba(139,26,26,.12); }
+    #busca::placeholder { color:#b0a0a0; }
+
+    /* ── TABELA ── */
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.875rem; }
+    thead tr { background:var(--wine); }
+    thead th { color:#fff; padding:12px 16px; text-align:left; font-size:.75rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    tbody td { padding:12px 16px; border-bottom:1px solid var(--wine-border); vertical-align:middle; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:nth-child(even) { background:var(--wine-light); }
+    tbody tr { transition:background .15s; }
+    tbody tr:hover { background:var(--wine-mid); }
+    .td-nome { font-weight:500; }
+    .td-preco { font-variant-numeric:tabular-nums; font-weight:600; color:var(--wine-dark); }
+    .badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:.72rem; font-weight:600; letter-spacing:.04em; text-transform:capitalize; }
+    .badge-entrada   { background:#fff3e0; color:#c87000; }
+    .badge-principal { background:#fce8e8; color:var(--wine); }
+    .badge-sobremesa { background:#ede7f6; color:#6a1b9a; }
+    .badge-bebida    { background:#e3f2fd; color:#1565c0; }
+    .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:.75rem; font-weight:600; }
+    .pill::before { content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .pill-sim { background:#d4f1e3; color:#1a7a47; } .pill-sim::before { background:#27ae60; }
+    .pill-nao { background:#fde8e8; color:#a52020; } .pill-nao::before { background:var(--red-err); }
+    .vazio td { text-align:center; padding:32px; color:var(--muted); font-style:italic; }
+
+    /* ── FORM ── */
+    .form-grid { display:grid; grid-template-columns:2fr 1fr 1.3fr auto; gap:12px; align-items:end; }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:.72rem; font-weight:600; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+    .field input, .field select { padding:10px 12px; border:1.5px solid var(--wine-border); border-radius:var(--radius); font-family:'Inter',sans-serif; font-size:.875rem; color:var(--text); background:var(--surface); transition:border-color .2s,box-shadow .2s; outline:none; appearance:none; -webkit-appearance:none; }
+    .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
+    .field input:focus, .field select:focus { border-color:var(--wine); box-shadow:0 0 0 3px rgba(139,26,26,.12); }
+    .field input::placeholder { color:#c0aaaa; }
+    .btn-submit { padding:10px 22px; background:var(--wine); color:#fff; border:none; border-radius:var(--radius); font-family:'Inter',sans-serif; font-size:.875rem; font-weight:600; cursor:pointer; transition:background .2s,transform .1s; white-space:nowrap; letter-spacing:.02em; box-shadow:0 2px 8px rgba(139,26,26,.25); }
+    .btn-submit:hover { background:var(--wine-dark); }
+    .btn-submit:active { transform:translateY(1px); }
+
+    /* ── LS BANNER ── */
+    .ls-banner { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border-radius:8px; font-size:.8rem; font-weight:500; margin-bottom:14px; }
+    .ls-banner.carregado { background:#e8f5e9; border:1px solid #a5d6a7; color:#2e7d32; }
+    .ls-banner.padrao    { background:#fff8e1; border:1px solid #ffe082; color:#f57f17; }
+    .ls-banner button { padding:5px 12px; border-radius:6px; border:1px solid currentColor; background:transparent; color:inherit; font-family:'Inter',sans-serif; font-size:.72rem; font-weight:600; cursor:pointer; opacity:.85; transition:opacity .2s; white-space:nowrap; }
+    .ls-banner button:hover { opacity:1; }
+
+    #mensagem { margin-top:12px; font-size:.85rem; font-weight:500; min-height:20px; }
+    .erro    { color:var(--red-err); }
+    .sucesso { color:var(--green); }
+
+    @media(max-width:640px){
+      header{padding:22px 20px;} header h1{font-size:1.5rem;}
+      main{padding:0 14px;} .card-body{padding:14px;}
+      .form-grid{grid-template-columns:1fr;} .btn-submit{width:100%;}
+      .sort-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-icon">🍽</span>
+    <h1>GastroControl</h1>
+    <span class="tagline">Sabor &amp; Arte</span>
+    <span class="subtitle">AF3 / AF4 — Algoritmos e Linguagem de Programação — Completo</span>
+  </div>
+</header>
+
+<nav class="parts-nav">
+  <a href="#parte1">Parte 1 — Arrays &amp; Loops</a>
+  <a href="#parte2">Parte 2 — Pilha &amp; Fila</a>
+  <a href="#parte3">Parte 3 — Funções &amp; Recursão</a>
+  <a href="#parte4">Parte 4 — Objetos &amp; DOM</a>
+  <a href="#extensao">Extensão</a>
+</nav>
+
+<main>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- PARTE 1                                           -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section id="parte1" class="section-group">
+    <h2 class="section-title">Parte 1 — Strings, Arrays e Loops</h2>
+
+    <!-- T1.1a -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">1a</div>
+        <h3>T1.1a — Recibo Formatado (Pedido 102)</h3>
+        <span class="pts">0,3 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t11a"></pre>
+      </div>
+    </div>
+
+    <!-- T1.1b -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">1b</div>
+        <h3>T1.1b — Buscar Prato (case-insensitive)</h3>
+        <span class="pts">0,3 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t11b"></pre>
+      </div>
+    </div>
+
+    <!-- T1.1c -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">1c</div>
+        <h3>T1.1c — Resumo por Categoria (reduce)</h3>
+        <span class="pts">0,4 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t11c"></pre>
+      </div>
+    </div>
+
+    <!-- T1.2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">1.2</div>
+        <h3>T1.2 — filter, map e reduce nos Pedidos</h3>
+        <span class="pts">1,0 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="output-label">a) Nomes dos pratos — Pedido 104</div>
+        <pre class="output" id="out-t12a"></pre>
+        <div class="output-label">b) Total por pedido</div>
+        <pre class="output" id="out-t12b"></pre>
+        <div class="output-label">c) Total combinado dos pedidos aguardando</div>
+        <pre class="output" id="out-t12c"></pre>
+        <div class="output-label">d) Prato mais caro nos pedidos preparando</div>
+        <pre class="output" id="out-t12d"></pre>
+      </div>
+    </div>
+
+    <!-- T1.3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">1.3</div>
+        <h3>T1.3 — Matriz: Grid de Ocupação de Mesas</h3>
+        <span class="pts">1,0 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="output-label">a) Taxa de ocupação por turno</div>
+        <pre class="output" id="out-t13a"></pre>
+        <div class="output-label">b) Mesas livres no Jantar</div>
+        <pre class="output" id="out-t13b"></pre>
+        <div class="output-label">c) Mesa mais e menos ocupada</div>
+        <pre class="output" id="out-t13c"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- PARTE 2                                           -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section id="parte2" class="section-group">
+    <h2 class="section-title">Parte 2 — Pilha, Fila e Algoritmos</h2>
+
+    <!-- T2.1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">2.1</div>
+        <h3>T2.1 — Pilha: Sistema de Undo / Redo</h3>
+        <span class="pts">1,0 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t21"></pre>
+      </div>
+    </div>
+
+    <!-- T2.2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">2.2</div>
+        <h3>T2.2 — Fila: Pedidos da Cozinha (FIFO)</h3>
+        <span class="pts">1,0 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t22"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- PARTE 3                                           -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section id="parte3" class="section-group">
+    <h2 class="section-title">Parte 3 — Funções, Recursividade e Tratamento de Erros</h2>
+
+    <!-- T3.1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">3.1</div>
+        <h3>T3.1 — Funções Modulares e Higher-Order</h3>
+        <span class="pts">1,0 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="output-label">a) calcularTotalPedido</div>
+        <pre class="output" id="out-t31a"></pre>
+        <div class="output-label">b) aplicarDesconto (closure)</div>
+        <pre class="output" id="out-t31b"></pre>
+        <div class="output-label">c) processarPedidos (higher-order — 3 usos)</div>
+        <pre class="output" id="out-t31c"></pre>
+      </div>
+    </div>
+
+    <!-- T3.2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">3.2</div>
+        <h3>T3.2 — Recursividade: Preço Total do Combo</h3>
+        <span class="pts">0,8 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t32"></pre>
+      </div>
+    </div>
+
+    <!-- T3.3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">3.3</div>
+        <h3>T3.3 — Tratamento de Erros com try/catch</h3>
+        <span class="pts">0,7 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-t33"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- PARTE 4                                           -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section id="parte4" class="section-group">
+    <h2 class="section-title">Parte 4 — Objetos, Map/Set, DOM e Eventos</h2>
+
+    <!-- T4.1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">4.1</div>
+        <h3>T4.1 — Objeto Caixa com Métodos</h3>
+        <span class="pts">0,8 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="output-label">extrato()</div>
+        <pre class="output" id="out-t41a"></pre>
+        <div class="output-label">resumo() — com destructuring</div>
+        <pre class="output" id="out-t41b"></pre>
+      </div>
+    </div>
+
+    <!-- T4.2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">4.2</div>
+        <h3>T4.2 — Map e Set</h3>
+        <span class="pts">0,5 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="output-label">Map — vendas por categoria</div>
+        <pre class="output" id="out-t42a"></pre>
+        <div class="output-label">Set — categorias únicas e não pedidas</div>
+        <pre class="output" id="out-t42b"></pre>
+      </div>
+    </div>
+
+    <!-- T4.3 — Painel interativo -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <h3>T4.3 — Buscar Prato</h3>
+        <span class="pts">0,4 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="busca" placeholder="Filtrar cardápio em tempo real…">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <h3>T4.3 — Cardápio</h3>
+        <span class="pts">0,4 pt</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Preço</th><th>Categoria</th><th>Disponível</th></tr></thead>
+          <tbody id="corpo-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <h3>T4.3 — Adicionar Prato</h3>
+        <span class="pts">0,4 pt</span>
+      </div>
+      <div class="card-body">
+        <div id="ls-banner" class="ls-banner padrao">
+          <span id="ls-texto">Verificando localStorage…</span>
+          <button id="btn-reset">Limpar dados salvos</button>
+        </div>
+        <form id="form-prato">
+          <div class="form-grid">
+            <div class="field">
+              <label for="nome-prato">Nome do Prato</label>
+              <input type="text" id="nome-prato" placeholder="Ex: Risoto de Camarão">
+            </div>
+            <div class="field">
+              <label for="preco-prato">Preço (R$)</label>
+              <input type="number" id="preco-prato" placeholder="0,00" step="0.01" min="0.01">
+            </div>
+            <div class="field">
+              <label for="categoria-prato">Categoria</label>
+              <select id="categoria-prato">
+                <option value="">Selecione…</option>
+                <option value="entrada">Entrada</option>
+                <option value="principal">Principal</option>
+                <option value="sobremesa">Sobremesa</option>
+                <option value="bebida">Bebida</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-submit">Adicionar</button>
+          </div>
+        </form>
+        <p id="mensagem"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- EXTENSÃO                                          -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section id="extensao" class="section-group">
+    <h2 class="section-title">Extensão — Bubble Sort &amp; localStorage (+1,0 pt)</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="font-size:1rem;font-weight:700;">⇅</div>
+        <h3>Ext A — Bubble Sort: Cardápio por Preço (sem .sort())</h3>
+        <span class="pts">+0,5 pt</span>
+      </div>
+      <div class="card-body">
+        <div class="sort-grid">
+          <div class="sort-col antes">
+            <h4>Antes — Ordem Original</h4>
+            <ul class="sort-list" id="sort-antes"></ul>
+          </div>
+          <div class="sort-col depois">
+            <h4>Depois — Bubble Sort (crescente)</h4>
+            <ul class="sort-list" id="sort-depois"></ul>
+          </div>
+        </div>
+        <div class="output-label">Saída no console</div>
+        <pre class="output" id="out-bubble"></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">💾</div>
+        <h3>Ext B — localStorage: os pratos adicionados persistem ao recarregar</h3>
+        <span class="pts">+0,5 pt</span>
+      </div>
+      <div class="card-body">
+        <pre class="output" id="out-ls"></pre>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// DADOS BASE
+// ════════════════════════════════════════════════════════════════
+
+const dadosBase = [
+  { id: 1,  nome: "Bruschetta Caprese",    preco: 28.90, categoria: "entrada",   disponivel: true  },
+  { id: 2,  nome: "Carpaccio de Salmão",   preco: 42.00, categoria: "entrada",   disponivel: true  },
+  { id: 3,  nome: "Risoto de Cogumelos",   preco: 56.90, categoria: "principal", disponivel: true  },
+  { id: 4,  nome: "Filé ao Molho Madeira", preco: 68.50, categoria: "principal", disponivel: false },
+  { id: 5,  nome: "Salmão Grelhado",       preco: 72.00, categoria: "principal", disponivel: true  },
+  { id: 6,  nome: "Tiramisu",              preco: 24.00, categoria: "sobremesa", disponivel: true  },
+  { id: 7,  nome: "Petit Gâteau",          preco: 32.00, categoria: "sobremesa", disponivel: true  },
+  { id: 8,  nome: "Suco Natural",          preco: 12.00, categoria: "bebida",    disponivel: true  },
+  { id: 9,  nome: "Água com Gás",          preco:  8.00, categoria: "bebida",    disponivel: true  },
+  { id: 10, nome: "Espresso",              preco:  9.50, categoria: "bebida",    disponivel: true  },
+];
+
+const pedidos = [
+  { id: 101, mesa: 3, itens: [1, 3, 8],     horario: "19:15", status: "entregue"   },
+  { id: 102, mesa: 1, itens: [2, 5, 6, 10], horario: "19:30", status: "preparando" },
+  { id: 103, mesa: 5, itens: [3, 7, 9],     horario: "19:45", status: "aguardando" },
+  { id: 104, mesa: 2, itens: [1, 5, 7, 8],  horario: "20:00", status: "aguardando" },
+  { id: 105, mesa: 4, itens: [2, 3, 6],     horario: "20:15", status: "preparando" },
+];
+
+// cardapio estático para cálculos das partes 1-3 (não afetado por localStorage)
+const cardapioEstatico = dadosBase.map(p => ({ ...p }));
+
+// ════════════════════════════════════════════════════════════════
+// PARTE 1 — STRINGS, ARRAYS E LOOPS
+// ════════════════════════════════════════════════════════════════
+
+// ── T1.1a — Recibo Formatado ─────────────────────────────────
+function gerarRecibo(pedidoId) {
+  const pedido = pedidos.find(p => p.id === pedidoId);
+  if (!pedido) return "Pedido não encontrado.";
+
+  const itensPedido = pedido.itens.map(id => cardapioEstatico.find(p => p.id === id));
+  const subtotal = itensPedido.reduce((acc, p) => acc + p.preco, 0);
+  const servico  = parseFloat((subtotal * 0.1).toFixed(2));
+  const total    = parseFloat((subtotal + servico).toFixed(2));
+
+  const barra  = "═".repeat(33);
+  const tracos = "-".repeat(33);
+  let r = "";
+  r += barra + "\n";
+  r += "      SABOR & ARTE — RECIBO\n";
+  r += barra + "\n";
+  r += `Mesa: ${pedido.mesa} | Horário: ${pedido.horario}\n`;
+  r += tracos + "\n";
+  itensPedido.forEach((p, i) => {
+    const lbl = `${i + 1}. ${p.nome}`;
+    const val = `R$ ${p.preco.toFixed(2).replace(".", ",")}`;
+    r += `${lbl.padEnd(26)}${val}\n`;
+  });
+  r += tracos + "\n";
+  r += `${"Subtotal:".padEnd(26)}R$ ${subtotal.toFixed(2).replace(".", ",")}\n`;
+  r += `${"Serviço (10%):".padEnd(26)}R$ ${servico.toFixed(2).replace(".", ",")}\n`;
+  r += `${"TOTAL:".padEnd(26)}R$ ${total.toFixed(2).replace(".", ",")}\n`;
+  r += barra;
+  return r;
+}
+
+// ── T1.1b — Buscar Prato ─────────────────────────────────────
+function buscarPratoEstatico(termo) {
+  return cardapioEstatico.filter(p => p.nome.toLowerCase().includes(termo.toLowerCase()));
+}
+
+// ── T1.1c — Resumo por Categoria (reduce) ────────────────────
+const acumulado = cardapioEstatico.reduce((acc, p) => {
+  const cat = p.categoria;
+  if (!acc[cat]) acc[cat] = { qtd: 0, soma: 0 };
+  acc[cat].qtd++;
+  acc[cat].soma += p.preco;
+  return acc;
+}, {});
+const resumoCategoria = Object.entries(acumulado).reduce((obj, [cat, d]) => {
+  obj[cat] = { qtd: d.qtd, precoMedio: parseFloat((d.soma / d.qtd).toFixed(2)) };
+  return obj;
+}, {});
+
+// ── T1.2 — filter, map e reduce nos Pedidos ──────────────────
+// a) nomes do pedido 104
+const nomesPedido104 = pedidos
+  .find(p => p.id === 104).itens
+  .map(id => cardapioEstatico.find(p => p.id === id).nome);
+
+// b) total por pedido
+const totaisPedidos = pedidos.map(ped => ({
+  id:    ped.id,
+  mesa:  ped.mesa,
+  total: ped.itens.reduce((acc, id) => acc + cardapioEstatico.find(p => p.id === id).preco, 0),
+}));
+
+// c) total combinado aguardando
+const totalAguardando = pedidos
+  .filter(p => p.status === "aguardando")
+  .reduce((acc, ped) => acc + ped.itens.reduce(
+    (s, id) => s + cardapioEstatico.find(p => p.id === id).preco, 0), 0);
+
+// d) prato mais caro nos pedidos preparando
+const pratoMaisCaro = pedidos
+  .filter(p => p.status === "preparando")
+  .flatMap(p => p.itens)
+  .map(id => cardapioEstatico.find(p => p.id === id))
+  .reduce((caro, p) => (p.preco > caro.preco ? p : caro));
+
+// ── T1.3 — Matriz de Ocupação ────────────────────────────────
+const ocupacao = [
+  [1, 0, 1, 0],  // Mesa 1
+  [1, 1, 1, 0],  // Mesa 2
+  [0, 0, 1, 1],  // Mesa 3
+  [1, 0, 0, 1],  // Mesa 4
+  [0, 0, 1, 0],  // Mesa 5
+];
+const nomesTurnos = ["Almoço", "Tarde", "Jantar", "Noite"];
+
+function encontrarMaisOcupada(grid) {
+  let maiorQtd = -1, menorQtd = Infinity, mesaMaior = 0, mesaMenor = 0;
+  for (let i = 0; i < grid.length; i++) {
+    let soma = 0;
+    for (let j = 0; j < grid[i].length; j++) soma += grid[i][j];
+    if (soma > maiorQtd) { maiorQtd = soma; mesaMaior = i + 1; }
+    if (soma < menorQtd) { menorQtd = soma; mesaMenor = i + 1; }
+  }
+  return { mesa: mesaMaior, qtdOcupada: maiorQtd, mesaMaisLivre: mesaMenor, qtdLivre: menorQtd };
+}
+
+// ════════════════════════════════════════════════════════════════
+// PARTE 2 — PILHA, FILA E ALGORITMOS
+// ════════════════════════════════════════════════════════════════
+
+// ── T2.1 — Pilha Undo/Redo ───────────────────────────────────
+const historico    = [];
+const pilhaRefazer = [];
+
+function executarAcao(descricao) {
+  historico.push(descricao);
+  pilhaRefazer.length = 0; // limpa redo ao executar nova ação
+}
+function desfazer() {
+  if (historico.length === 0) return "Nada para desfazer.";
+  const acao = historico.pop();
+  pilhaRefazer.push(acao);
+  return `Ação desfeita: ${acao}`;
+}
+function refazerAcao() {
+  if (pilhaRefazer.length === 0) return "Nada para refazer.";
+  const acao = pilhaRefazer.pop();
+  historico.push(acao);
+  return `Ação refeita: ${acao}`;
+}
+
+// ── T2.2 — Fila FIFO ─────────────────────────────────────────
+const filaCozinha = [];
+
+function novoPedido(pedidoId, mesa) { filaCozinha.push({ pedidoId, mesa }); }
+function statusFila() {
+  if (filaCozinha.length === 0) return "Nenhum pedido na fila.";
+  const p = filaCozinha[0];
+  return `Fila: ${filaCozinha.length} pedidos | Próximo: Pedido ${p.pedidoId} (Mesa ${p.mesa})`;
+}
+function prepararProximo() {
+  if (filaCozinha.length === 0) return "Nenhum pedido na fila.";
+  const p = filaCozinha.shift();
+  return `Preparando Pedido ${p.pedidoId} (Mesa ${p.mesa})... Restam ${filaCozinha.length} na fila.`;
+}
+function tempoEstimado() {
+  if (filaCozinha.length === 0) return "Nenhum pedido na fila.";
+  const qtd = filaCozinha.length;
+  return `Tempo estimado: ${qtd * 15} min (${qtd} pedido${qtd > 1 ? "s" : ""} × 15 min cada)`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// PARTE 3 — FUNÇÕES, RECURSIVIDADE E TRATAMENTO DE ERROS
+// ════════════════════════════════════════════════════════════════
+
+// ── T3.1a — calcularTotalPedido ──────────────────────────────
+function calcularTotalPedido(pedidoId) {
+  const pedido = pedidos.find(p => p.id === pedidoId);
+  if (!pedido) return "Pedido não encontrado";
+  return pedido.itens.reduce(
+    (acc, id) => acc + cardapioEstatico.find(p => p.id === id).preco, 0);
+}
+
+// ── T3.1b — aplicarDesconto (closure) ────────────────────────
+function aplicarDesconto(percentual) {
+  return function(preco) {
+    return parseFloat((preco * (1 - percentual / 100)).toFixed(2));
+  };
+}
+
+// ── T3.1c — processarPedidos (higher-order) ──────────────────
+function processarPedidos(arr, callback) {
+  arr.forEach(callback);
+}
+
+// ── T3.2 — Recursividade: calcularPrecoCombo ─────────────────
+const combo = {
+  nome: "Super Combo Família",
+  preco: 0,
+  subItens: [
+    { nome: "Bruschetta", preco: 28.90, subItens: [] },
+    { nome: "Combo Casal", preco: 10,
+      subItens: [
+        { nome: "Risoto",  preco: 56.90, subItens: [] },
+        { nome: "Salmão",  preco: 72.00, subItens: [] },
+      ]
+    },
+    { nome: "Sobremesa Dupla", preco: 5,
+      subItens: [
+        { nome: "Tiramisu",    preco: 24.00, subItens: [] },
+        { nome: "Petit Gâteau",preco: 32.00, subItens: [] },
+      ]
+    },
+  ]
+};
+
+function calcularPrecoCombo(item) {
+  // caso base: sem sub-itens → retorna o próprio preço
+  if (item.subItens.length === 0) return item.preco;
+  // caso recursivo: soma o preço do item + preço de cada sub-item (recursivamente)
+  return item.preco + item.subItens.reduce(
+    (acc, sub) => acc + calcularPrecoCombo(sub), 0);
+}
+
+// ── T3.3 — adicionarPrato com try/catch ──────────────────────
+// Usada tanto nos testes de T3.3 quanto no formulário DOM (T4.3)
+const CHAVE_LS = "gastrocontrol_cardapio";
+
+function carregarCardapio() {
+  const salvo = localStorage.getItem(CHAVE_LS);
+  return salvo ? JSON.parse(salvo) : dadosBase.map(p => ({ ...p }));
+}
+function salvarCardapio() {
+  localStorage.setItem(CHAVE_LS, JSON.stringify(cardapio));
+}
+
+const cardapio = carregarCardapio(); // array vivo — sofre alterações do formulário
+
+function adicionarPrato(nome, preco, categoria) {
+  const cats = ["entrada", "principal", "sobremesa", "bebida"];
+  if (typeof nome !== "string" || nome.trim() === "")
+    throw new Error("Nome não pode ser vazio");
+  if (typeof preco !== "number" || isNaN(preco) || preco <= 0)
+    throw new Error("Preço deve ser um número positivo");
+  if (!cats.includes(categoria))
+    throw new Error("Categoria inválida. Use: entrada, principal, sobremesa, bebida");
+  if (cardapio.some(p => p.nome.toLowerCase() === nome.trim().toLowerCase()))
+    throw new Error("Prato já existe no cardápio");
+  const novo = { id: cardapio.length + 1, nome: nome.trim(), preco, categoria, disponivel: true };
+  cardapio.push(novo);
+  salvarCardapio(); // Ext B: persiste no localStorage
+  return novo;
+}
+
+// ════════════════════════════════════════════════════════════════
+// PARTE 4 — OBJETOS, MAP/SET, DOM E EVENTOS
+// ════════════════════════════════════════════════════════════════
+
+// ── T4.1 — Objeto Caixa ──────────────────────────────────────
+const caixa = {
+  saldoInicial: 500.00,
+  transacoes: [],
+  registrarEntrada(valor, descricao) {
+    this.transacoes.push({ tipo: "entrada", valor, descricao });
+  },
+  registrarSaida(valor, descricao) {
+    this.transacoes.push({ tipo: "saida", valor, descricao });
+  },
+  saldoAtual() {
+    return this.transacoes.reduce(
+      (acc, t) => t.tipo === "entrada" ? acc + t.valor : acc - t.valor,
+      this.saldoInicial);
+  },
+  extrato() {
+    return this.transacoes.map(t => {
+      const sinal = t.tipo === "entrada" ? "[+]" : "[-]";
+      return `${sinal} R$ ${t.valor.toFixed(2).replace(".", ",")} — ${t.descricao}`;
+    }).join("\n");
+  },
+  resumo() {
+    const entradas = this.transacoes.filter(t => t.tipo === "entrada")
+      .reduce((acc, t) => acc + t.valor, 0);
+    const saidas   = this.transacoes.filter(t => t.tipo === "saida")
+      .reduce((acc, t) => acc + t.valor, 0);
+    return {
+      entradas: parseFloat(entradas.toFixed(2)),
+      saidas:   parseFloat(saidas.toFixed(2)),
+      saldo:    parseFloat((this.saldoInicial + entradas - saidas).toFixed(2)),
+    };
+  },
+};
+
+// ── T4.2 — Map e Set ─────────────────────────────────────────
+const vendasPorCategoria = new Map();
+pedidos.forEach(ped => {
+  ped.itens.forEach(id => {
+    const p = cardapioEstatico.find(x => x.id === id);
+    if (p) vendasPorCategoria.set(p.categoria, (vendasPorCategoria.get(p.categoria) || 0) + p.preco);
+  });
+});
+
+const categoriasPedidas = new Set();
+pedidos.forEach(ped => {
+  ped.itens.forEach(id => {
+    const p = cardapioEstatico.find(x => x.id === id);
+    if (p) categoriasPedidas.add(p.categoria);
+  });
+});
+const todasCategorias = new Set(cardapioEstatico.map(p => p.categoria));
+const naoFoiPedida = [...todasCategorias].filter(c => !categoriasPedidas.has(c));
+
+// ── T4.3 — DOM: renderizarTabela e buscarPrato ───────────────
+function buscarPrato(termo) {
+  return cardapio.filter(p => p.nome.toLowerCase().includes(termo.toLowerCase()));
+}
+
+const badgeClass = {
+  entrada: "badge-entrada", principal: "badge-principal",
+  sobremesa: "badge-sobremesa", bebida: "badge-bebida",
+};
+
+function renderizarTabela(lista) {
+  const corpo = document.getElementById("corpo-tabela");
+  corpo.innerHTML = "";
+  if (lista.length === 0) {
+    const tr = document.createElement("tr");
+    tr.className = "vazio";
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.textContent = "Nenhum prato encontrado.";
+    tr.appendChild(td);
+    corpo.appendChild(tr);
+    return;
+  }
+  lista.forEach(prato => {
+    const tr = document.createElement("tr");
+
+    const tdNome = document.createElement("td");
+    tdNome.className = "td-nome";
+    tdNome.textContent = prato.nome;
+
+    const tdPreco = document.createElement("td");
+    tdPreco.className = "td-preco";
+    tdPreco.textContent = `R$ ${prato.preco.toFixed(2).replace(".", ",")}`;
+
+    const tdCat = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = `badge ${badgeClass[prato.categoria] || ""}`;
+    badge.textContent = prato.categoria.charAt(0).toUpperCase() + prato.categoria.slice(1);
+    tdCat.appendChild(badge);
+
+    const tdDisp = document.createElement("td");
+    const pill   = document.createElement("span");
+    pill.className   = prato.disponivel ? "pill pill-sim" : "pill pill-nao";
+    pill.textContent = prato.disponivel ? "Disponível" : "Indisponível";
+    tdDisp.appendChild(pill);
+
+    tr.append(tdNome, tdPreco, tdCat, tdDisp);
+    corpo.appendChild(tr);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// EXTENSÃO A — BUBBLE SORT (sem .sort())
+// ════════════════════════════════════════════════════════════════
+function bubbleSort(arr) {
+  const n = arr.length;
+  for (let passagem = 0; passagem < n - 1; passagem++) {
+    let houveTroca = false;
+    for (let j = 0; j < n - 1 - passagem; j++) {
+      // compara adjacentes e troca se necessário
+      if (arr[j].preco > arr[j + 1].preco) {
+        const temp = arr[j];
+        arr[j]     = arr[j + 1];
+        arr[j + 1] = temp;
+        houveTroca = true;
+      }
+    }
+    if (!houveTroca) break; // array já ordenado
+  }
+  return arr;
+}
+
+// ════════════════════════════════════════════════════════════════
+// RENDER — popula todos os blocos de output na página
+// ════════════════════════════════════════════════════════════════
+function out(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+window.addEventListener("DOMContentLoaded", function () {
+
+  // ── T1.1a ──────────────────────────────────────────────────
+  out("out-t11a", gerarRecibo(102));
+
+  // ── T1.1b ──────────────────────────────────────────────────
+  const busca = buscarPratoEstatico("sal");
+  out("out-t11b",
+    `buscarPrato("sal") → ${JSON.stringify(busca.map(p => p.nome))}\n\n` +
+    busca.map(p => `  • ${p.nome} (R$ ${p.preco.toFixed(2)})`).join("\n")
+  );
+
+  // ── T1.1c ──────────────────────────────────────────────────
+  out("out-t11c",
+    Object.entries(resumoCategoria)
+      .map(([cat, d]) => `${cat.padEnd(12)} → qtd: ${d.qtd} | preçoMédio: R$ ${d.precoMedio.toFixed(2)}`)
+      .join("\n")
+  );
+
+  // ── T1.2 ───────────────────────────────────────────────────
+  out("out-t12a", JSON.stringify(nomesPedido104, null, 2));
+  out("out-t12b",
+    totaisPedidos
+      .map(p => `Pedido ${p.id} | Mesa ${p.mesa} → R$ ${p.total.toFixed(2)}`)
+      .join("\n")
+  );
+  out("out-t12c",
+    `Pedidos aguardando: ${pedidos.filter(p => p.status === "aguardando").map(p => p.id).join(", ")}\n` +
+    `Total combinado: R$ ${totalAguardando.toFixed(2)}`
+  );
+  out("out-t12d",
+    `${pratoMaisCaro.nome} — R$ ${pratoMaisCaro.preco.toFixed(2)}`
+  );
+
+  // ── T1.3 ───────────────────────────────────────────────────
+  const t13a = [];
+  for (let j = 0; j < nomesTurnos.length; j++) {
+    let oc = 0;
+    for (let i = 0; i < ocupacao.length; i++) oc += ocupacao[i][j];
+    t13a.push(`${nomesTurnos[j].padEnd(8)}: ${(oc / ocupacao.length * 100).toFixed(0)}% ocupado — ${oc}/${ocupacao.length} mesas`);
+  }
+  out("out-t13a", t13a.join("\n"));
+
+  const idxJ = nomesTurnos.indexOf("Jantar");
+  const livres = [];
+  for (let i = 0; i < ocupacao.length; i++) {
+    if (ocupacao[i][idxJ] === 0) livres.push(`Mesa ${i + 1}`);
+  }
+  out("out-t13b", `Mesa(s) livre(s) no Jantar: ${livres.length > 0 ? livres.join(", ") : "Nenhuma"}`);
+
+  const { mesa, qtdOcupada, mesaMaisLivre, qtdLivre } = encontrarMaisOcupada(ocupacao);
+  out("out-t13c",
+    `Mesa mais ocupada: Mesa ${mesa} (${qtdOcupada}/4 turnos) | Mesa mais livre: Mesa ${mesaMaisLivre} (${qtdLivre}/4 turnos)`
+  );
+
+  // ── T2.1 ───────────────────────────────────────────────────
+  executarAcao("Adicionar prato 'Lasanha' ao cardápio");
+  executarAcao("Remover prato 'Filé ao Molho Madeira'");
+  executarAcao("Alterar preço do Risoto para R$ 59,90");
+  const t21 = [
+    "executarAcao × 3 ações",
+    desfazer(),
+    desfazer(),
+    refazerAcao(),
+    desfazer(),
+    desfazer(),
+    desfazer(),   // pilha vazia
+  ];
+  out("out-t21", t21.join("\n"));
+
+  // ── T2.2 ───────────────────────────────────────────────────
+  novoPedido(103, 5);
+  novoPedido(104, 2);
+  novoPedido(105, 4);
+  const t22 = [
+    "novoPedido(103,5) / novoPedido(104,2) / novoPedido(105,4)",
+    statusFila(),
+    prepararProximo(),
+    prepararProximo(),
+    tempoEstimado(),
+    prepararProximo(),
+    prepararProximo(),  // fila vazia
+  ];
+  out("out-t22", t22.join("\n"));
+
+  // ── T3.1a ──────────────────────────────────────────────────
+  out("out-t31a",
+    `calcularTotalPedido(102) → ${calcularTotalPedido(102).toFixed(2)}\n` +
+    `calcularTotalPedido(999) → ${calcularTotalPedido(999)}`
+  );
+
+  // ── T3.1b ──────────────────────────────────────────────────
+  const desc10 = aplicarDesconto(10);
+  const desc20 = aplicarDesconto(20);
+  out("out-t31b",
+    `const desconto10 = aplicarDesconto(10)  // closure\n` +
+    `const desconto20 = aplicarDesconto(20)  // closure\n\n` +
+    `desconto10(100)   → ${desc10(100)}\n` +
+    `desconto20(100)   → ${desc20(100)}\n` +
+    `desconto10(56.90) → ${desc10(56.90)}`
+  );
+
+  // ── T3.1c ──────────────────────────────────────────────────
+  const t31c = [];
+  t31c.push("// Uso 1: listar mesas");
+  processarPedidos(pedidos, p => t31c.push(`  Mesa ${p.mesa}`));
+  t31c.push("// Uso 2: contar aguardando");
+  let count = 0;
+  processarPedidos(pedidos, p => { if (p.status === "aguardando") count++; });
+  t31c.push(`  Pedidos aguardando: ${count}`);
+  t31c.push("// Uso 3: array de totais");
+  const totais = [];
+  processarPedidos(pedidos, p => {
+    const total = p.itens.reduce((acc, id) => acc + cardapioEstatico.find(x => x.id === id).preco, 0);
+    totais.push(`  Pedido ${p.id} → R$ ${total.toFixed(2)}`);
+  });
+  t31c.push(...totais);
+  out("out-t31c", t31c.join("\n"));
+
+  // ── T3.2 ───────────────────────────────────────────────────
+  const totalCombo = calcularPrecoCombo(combo);
+  out("out-t32",
+    `calcularPrecoCombo(combo) → ${totalCombo.toFixed(2)}\n\n` +
+    `Decomposição:\n` +
+    `  Super Combo Família:  0,00\n` +
+    `    Bruschetta:        28,90\n` +
+    `    Combo Casal:       10,00\n` +
+    `      Risoto:          56,90\n` +
+    `      Salmão:          72,00\n` +
+    `    Sobremesa Dupla:    5,00\n` +
+    `      Tiramisu:        24,00\n` +
+    `      Petit Gâteau:    32,00\n` +
+    `                     ──────\n` +
+    `  TOTAL:             228,80`
+  );
+
+  // ── T3.3 ───────────────────────────────────────────────────
+  // testa em cópia isolada para não poluir o cardapio live
+  const cardapioTeste = dadosBase.map(p => ({ ...p }));
+  function adicionarPratoTeste(nome, preco, categoria) {
+    const cats = ["entrada", "principal", "sobremesa", "bebida"];
+    if (typeof nome !== "string" || nome.trim() === "")
+      throw new Error("Nome não pode ser vazio");
+    if (typeof preco !== "number" || isNaN(preco) || preco <= 0)
+      throw new Error("Preço deve ser um número positivo");
+    if (!cats.includes(categoria))
+      throw new Error("Categoria inválida. Use: entrada, principal, sobremesa, bebida");
+    if (cardapioTeste.some(p => p.nome.toLowerCase() === nome.trim().toLowerCase()))
+      throw new Error("Prato já existe no cardápio");
+    const novo = { id: cardapioTeste.length + 1, nome: nome.trim(), preco, categoria, disponivel: true };
+    cardapioTeste.push(novo);
+    return novo;
+  }
+  function testar(fn) {
+    try { return `✓ ${fn()}`; }
+    catch(e) { return `✕ Erro: ${e.message}`; }
+  }
+  const t33 = [
+    testar(() => { adicionarPratoTeste("", 25, "entrada"); return "ok"; }),
+    testar(() => { adicionarPratoTeste("Ceviche", -10, "entrada"); return "ok"; }),
+    testar(() => { adicionarPratoTeste("Ceviche", 35, "lanche"); return "ok"; }),
+    testar(() => {
+      const n = adicionarPratoTeste("Ceviche", 35, "entrada");
+      return `Adicionado: ${n.nome} | R$ ${n.preco.toFixed(2)} | ${n.categoria}`;
+    }),
+  ];
+  out("out-t33", t33.join("\n"));
+
+  // ── T4.1 ───────────────────────────────────────────────────
+  caixa.registrarEntrada(162.25, "Pedido 102 - Mesa 1");
+  caixa.registrarEntrada( 97.90, "Pedido 103 - Mesa 5");
+  caixa.registrarSaida(   45.00, "Compra de insumos");
+  caixa.registrarSaida(  120.00, "Pagamento garçom");
+  out("out-t41a", caixa.extrato());
+  const { entradas, saidas, saldo } = caixa.resumo();
+  out("out-t41b",
+    `Entradas: R$ ${entradas.toFixed(2)} | Saídas: R$ ${saidas.toFixed(2)} | Saldo: R$ ${saldo.toFixed(2)}`
+  );
+
+  // ── T4.2 ───────────────────────────────────────────────────
+  const mapLines = [];
+  vendasPorCategoria.forEach((val, key) => {
+    mapLines.push(`  "${key}" → R$ ${val.toFixed(2)}`);
+  });
+  out("out-t42a", `Map de vendas por categoria:\n${mapLines.join("\n")}`);
+
+  out("out-t42b",
+    `Categorias pedidas: Set { ${[...categoriasPedidas].map(c => `"${c}"`).join(", ")} }\n` +
+    `Categorias não pedidas: ${naoFoiPedida.length === 0 ? "(nenhuma — todas aparecem nos pedidos)" : naoFoiPedida.join(", ")}`
+  );
+
+  // ── T4.3 DOM ───────────────────────────────────────────────
+  renderizarTabela(cardapio);
+
+  document.getElementById("busca").addEventListener("input", function () {
+    const termo = this.value.trim();
+    renderizarTabela(termo === "" ? cardapio : buscarPrato(termo));
+  });
+
+  document.getElementById("form-prato").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const msgEl     = document.getElementById("mensagem");
+    const nome      = document.getElementById("nome-prato").value;
+    const preco     = parseFloat(document.getElementById("preco-prato").value);
+    const categoria = document.getElementById("categoria-prato").value;
+    try {
+      const novo = adicionarPrato(nome, preco, categoria);
+      msgEl.textContent = `✓ "${novo.nome}" adicionado e salvo no localStorage!`;
+      msgEl.className   = "sucesso";
+      this.reset();
+      atualizarBannerLS();
+      const termo = document.getElementById("busca").value.trim();
+      renderizarTabela(termo === "" ? cardapio : buscarPrato(termo));
+    } catch (e) {
+      msgEl.textContent = `✕ ${e.message}`;
+      msgEl.className   = "erro";
+    }
+  });
+
+  // ── Ext B — localStorage banner ────────────────────────────
+  function atualizarBannerLS() {
+    const banner  = document.getElementById("ls-banner");
+    const lsTexto = document.getElementById("ls-texto");
+    if (localStorage.getItem(CHAVE_LS) !== null) {
+      banner.className  = "ls-banner carregado";
+      lsTexto.textContent = `✓ Cardápio carregado do localStorage (${cardapio.length} pratos persistidos)`;
+    } else {
+      banner.className  = "ls-banner padrao";
+      lsTexto.textContent = "⚠ Dados padrão — novos pratos serão salvos automaticamente";
+    }
+  }
+  atualizarBannerLS();
+
+  document.getElementById("btn-reset").addEventListener("click", function () {
+    if (confirm("Apagar todos os pratos salvos e voltar ao cardápio original?")) {
+      localStorage.removeItem(CHAVE_LS);
+      location.reload();
+    }
+  });
+
+  out("out-ls",
+    `JSON.stringify(cardapio) → salvo na chave "${CHAVE_LS}"\n` +
+    `JSON.parse(localStorage.getItem("${CHAVE_LS}")) → restaurado ao recarregar\n\n` +
+    `Estado atual: ${localStorage.getItem(CHAVE_LS) !== null ? "dados do localStorage (" + cardapio.length + " pratos)" : "dados padrão (sem dados salvos)"}`
+  );
+
+  // ── Ext A — Bubble Sort visual ─────────────────────────────
+  const antes  = dadosBase.map(p => ({ ...p }));
+  const depois = bubbleSort(dadosBase.map(p => ({ ...p })));
+
+  function criarItemLista(prato) {
+    const li = document.createElement("li");
+    li.className = "sort-item";
+    const sn = document.createElement("span"); sn.className = "sn"; sn.textContent = prato.nome;
+    const sp = document.createElement("span"); sp.className = "sp"; sp.textContent = `R$ ${prato.preco.toFixed(2).replace(".", ",")}`;
+    li.append(sn, sp);
+    return li;
+  }
+  const la = document.getElementById("sort-antes");
+  const ld = document.getElementById("sort-depois");
+  antes.forEach(p  => la.appendChild(criarItemLista(p)));
+  depois.forEach(p => ld.appendChild(criarItemLista(p)));
+
+  out("out-bubble",
+    "Antes:  " + antes.map(p  => p.nome).join(", ") + "\n" +
+    "Depois: " + depois.map(p => p.nome).join(", ")
+  );
+
+});
+</script>
+</body>
+</html>
